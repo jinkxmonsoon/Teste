@@ -1,1 +1,50 @@
 # Teste
+
+import os
+import shutil
+from moviepy.editor import VideoFileClip
+
+def processar_icsi_icorp(videos_dir, audios_dir, pasta_saida, intervalo_frames=3):
+    os.makedirs(pasta_saida, exist_ok=True)
+    log = []
+
+    for video_file in os.listdir(videos_dir):
+        if video_file.endswith(".avi"):
+            base_name = os.path.splitext(video_file)[0]
+            video_path = os.path.join(videos_dir, video_file)
+            audio_path = os.path.join(audios_dir, f"{base_name}.wav")
+
+            output_dir = os.path.join(pasta_saida, base_name)
+            frames_dir = os.path.join(output_dir, "frames")
+            os.makedirs(frames_dir, exist_ok=True)
+
+            try:
+                # Copiar o áudio correspondente
+                if os.path.exists(audio_path):
+                    os.makedirs(output_dir, exist_ok=True)
+                    shutil.copy(audio_path, os.path.join(output_dir, "audio.wav"))
+                else:
+                    log.append(f"⚠ Áudio não encontrado para {base_name}")
+                    continue
+
+                # Extrair frames do vídeo
+                clip = VideoFileClip(video_path)
+                duration = int(clip.duration)
+
+                for t in range(0, duration, intervalo_frames):
+                    frame_path = os.path.join(frames_dir, f"frame_{t:04d}.jpg")
+                    clip.save_frame(frame_path, t)
+
+                log.append(f"✔ Processado: {base_name}")
+            except Exception as e:
+                log.append(f"❌ Erro em {base_name}: {e}")
+
+    return log
+
+# Exemplo de uso:
+# videos_dir = "/caminho/para/icsi/videos"
+# audios_dir = "/caminho/para/icsi/audios"
+# saida_dir = "/caminho/para/saida"
+# logs = processar_icsi_icorp(videos_dir, audios_dir, saida_dir, intervalo_frames=3)
+# for linha in logs:
+#     print(linha)
