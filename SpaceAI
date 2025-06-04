@@ -1,85 +1,63 @@
-Perfeito! Se o público não é técnico, não pretende se tornar programador ou cientista de dados, mas quer entender os potenciais da IA, então a abordagem ideal para a Aula 2 deve ser:
+import os
+import shutil
+from moviepy.editor import VideoFileClip
 
-⸻
+def processar_icsi_icorp(videos_dir, audios_dir, pasta_saida, intervalo_frames=3):
+    """
+    Processa os vídeos e áudios do ICSI Meeting Corpus.
+    
+    Parâmetros:
+        videos_dir (str): Caminho para a pasta com os arquivos .avi.
+        audios_dir (str): Caminho para a pasta com os arquivos .wav.
+        pasta_saida (str): Diretório onde os dados processados serão salvos.
+        intervalo_frames (int): Intervalo de tempo (em segundos) entre os frames extraídos.
+    
+    Saída:
+        Cria uma pasta por vídeo contendo:
+            - audio.wav
+            - pasta frames/ com as imagens extraídas
+        Retorna um log com o status de cada arquivo processado.
+    """
+    os.makedirs(pasta_saida, exist_ok=True)
+    log = []
 
-🎯 Aula 2 – O que a IA pode (e não pode) fazer hoje? Aplicações, limites e futuro
+    for video_file in os.listdir(videos_dir):
+        if video_file.endswith(".avi"):
+            base_name = os.path.splitext(video_file)[0]
+            video_path = os.path.join(videos_dir, video_file)
+            audio_path = os.path.join(audios_dir, f"{base_name}.wav")
 
-✅ Objetivo:
+            output_dir = os.path.join(pasta_saida, base_name)
+            frames_dir = os.path.join(output_dir, "frames")
+            os.makedirs(frames_dir, exist_ok=True)
 
-Mostrar de forma clara, empolgante e acessível o que a Inteligência Artificial já faz, onde ela falha, e como isso pode impactar a vida das pessoas em diferentes áreas.
+            try:
+                # Copiar o áudio correspondente
+                if os.path.exists(audio_path):
+                    os.makedirs(output_dir, exist_ok=True)
+                    shutil.copy(audio_path, os.path.join(output_dir, "audio.wav"))
+                else:
+                    log.append(f"⚠ Áudio não encontrado para {base_name}")
+                    continue
 
-⸻
+                # Extrair frames do vídeo
+                clip = VideoFileClip(video_path)
+                duration = int(clip.duration)
 
-📌 Estrutura da Aula:
+                for t in range(0, duration, intervalo_frames):
+                    frame_path = os.path.join(frames_dir, f"frame_{t:04d}.jpg")
+                    clip.save_frame(frame_path, t)
 
-⸻
+                log.append(f"✔ Processado: {base_name}")
+            except Exception as e:
+                log.append(f"❌ Erro em {base_name}: {e}")
 
-🧠 1. IA não é mágica — é estatística e padrão
+    return log
 
-“IA é como uma pessoa muito boa em reconhecer padrões — só que em velocidade sobre-humana.”
-
-Explicação simples:
-	•	Ela não entende como nós entendemos.
-	•	Ela reconhece padrões com base em milhões (ou bilhões) de exemplos anteriores.
-	•	Ela não tem consciência (ainda?).
-
-⸻
-
-🌎 2. Onde a IA já é usada no nosso dia a dia?
-
-Área	Aplicações de IA
-Saúde	Diagnóstico por imagem, análise de exames, apoio em consultas
-Educação	Tutores inteligentes, correção automática, resumos personalizados
-Varejo	Recomendação de produtos, assistentes virtuais, previsão de demanda
-Mobilidade	Waze, Google Maps, veículos autônomos
-Entretenimento	Netflix, Spotify, TikTok (recomendação), criação de músicas e vídeos
-Finanças	Detectar fraudes, análise de crédito, robo-advisors
-Segurança	Reconhecimento facial, monitoramento inteligente
-Atendimento	Chatbots, assistentes (como eu!), FAQs automáticos
-
-
-⸻
-
-🚫 3. O que a IA não consegue fazer (ainda)?
-	•	Entender contexto com profundidade humana
-	•	Criar algo verdadeiramente original
-	•	Ter empatia real ou julgamento moral
-	•	Agir fora do que foi treinada para fazer
-	•	Ser 100% confiável (alucinações, vieses, erros de interpretação)
-
-⸻
-
-💬 4. Exemplos reais e surpreendentes
-	•	ChatGPT escrevendo redações e currículos.
-	•	Deepfakes que imitam pessoas com perfeição.
-	•	Ferramentas que criam músicas no estilo de artistas famosos.
-	•	IA que lê radiografias melhor que médicos (em certos casos).
-	•	Geradores de imagem como Midjourney e DALL·E.
-	•	Legendas automáticas no YouTube (NLP + audição).
-
-⸻
-
-🔮 5. E o futuro?
-	•	IA emocional: sistemas que “entendem” emoções.
-	•	IA em casa: geladeiras, luzes, TVs e até roupas inteligentes.
-	•	IA como copiloto em tudo: do Excel ao email.
-	•	Riscos: privacidade, desemprego tecnológico, uso indevido (ex: manipulação política).
-
-⸻
-
-📚 6. Atividade da aula
-
-“Onde você já viu ou usou IA sem perceber?”
-
-	•	Cada aluno deve listar 3 situações em que foi impactado por IA no cotidiano.
-	•	Exemplo: recomendação de música, correção automática do celular, reconhecimento de voz.
-
-⸻
-
-🏁 Conclusão
-
-“A IA está aqui, não é mágica, mas pode transformar sua vida — para melhor ou para pior, dependendo de como a usamos.”
-
-⸻
-
-Se quiser, posso gerar agora essa Aula 2 em formato .docx para impressão, PDF ou slides. Como você prefere?
+# Exemplo de uso:
+# videos_dir = "/caminho/para/icsi/videos"
+# audios_dir = "/caminho/para/icsi/audios"
+# saida_dir = "/caminho/para/saida"
+# logs = processar_icsi_icorp(videos_dir, audios_dir, saida_dir, intervalo_frames=3)
+# for linha in logs:
+#     print(linha)
